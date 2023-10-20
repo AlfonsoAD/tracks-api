@@ -4,6 +4,7 @@ const { tokenSign } = require("../utils/handlerjwt");
 const { userModel } = require("../models");
 const { handleHttpError } = require("../utils/handlerError");
 
+const ENGINE_DB = process.env.ENGINE_DB;
 /**
  * Controlador para registrar un usuario
  * @param {*} req
@@ -21,7 +22,6 @@ const registerController = async (req, res) => {
       token: await tokenSign(dataUser),
       user: dataUser,
     };
-
     res.send({ ok: true, results: data });
   } catch (err) {
     handleHttpError(res, "ERROR_REGISTER_USER");
@@ -36,9 +36,14 @@ const registerController = async (req, res) => {
 const loginController = async (req, res) => {
   try {
     req = matchedData(req);
-    const user = await userModel
-      .findOne({ email: req.email })
-      .select("password name role email");
+
+    const user =
+      ENGINE_DB === "nosql"
+        ? await userModel
+            .findOne({ email: req.email })
+            .select("password name role email")
+        : await userModel.findOne({ email: req.email });
+
     if (!user) {
       handleHttpError(res, "USER_NOT_EXISTS", 404);
       return;
@@ -60,6 +65,7 @@ const loginController = async (req, res) => {
 
     res.send({ ok: true, results: data });
   } catch (err) {
+    console.log(err);
     handleHttpError(res, "ERROR_LOGIN_USER");
   }
 };

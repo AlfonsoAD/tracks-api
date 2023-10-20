@@ -2,9 +2,14 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morganBody = require("morgan-body");
+const swaggerUI = require("swagger-ui-express");
+const openAPIConfiguration = require("./docs/swagger");
 const loggerStream = require("./utils/handlerLogger");
 const dbConnect = require("./config/mongo");
+const { dbConnectMySQL } = require("./config/mysql");
 const app = express();
+
+const ENGINE_DB = process.env.ENGINE_DB;
 
 app.use(cors());
 app.use(express.json());
@@ -19,6 +24,18 @@ morganBody(app, {
 });
 
 const port = process.env.PORT || 3000;
+
+/**
+ * DEFINIR RUTA DE DOCUMENTACION
+ */
+
+app.use(
+  "/documentation",
+  swaggerUI.serve,
+  swaggerUI.setup(openAPIConfiguration)
+);
+
 app.use("/api", require("./routes"));
 app.listen(port, () => console.log(`http://localhost:${port}`));
-dbConnect();
+
+ENGINE_DB === "nosql" ? dbConnect() : dbConnectMySQL();

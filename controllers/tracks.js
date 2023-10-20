@@ -9,9 +9,10 @@ const { tracksModel } = require("../models");
  */
 const getItems = async (req, res) => {
   try {
-    const data = await tracksModel.find({});
+    const data = await tracksModel.findAllData({});
     res.send({ data });
   } catch (e) {
+    console.log(e);
     handleHttpError(res, "ERROR_GET_ITEMS");
   }
 };
@@ -24,9 +25,10 @@ const getItem = async (req, res) => {
   try {
     req = matchedData(req);
     const { id } = req;
-    const data = await tracksModel.findById(id);
+    const data = await tracksModel.findOneData(id);
     res.send({ ok: true, results: data });
   } catch (e) {
+    console.log(e);
     handleHttpError(res, "ERROR_GET_ITEM");
   }
 };
